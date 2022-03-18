@@ -33,7 +33,7 @@ step "Health Check" {
         environments = ["Test"]
         properties = {
             Octopus.Action.HealthCheck.ErrorHandling = "TreatExceptionsAsErrors"
-            Octopus.Action.HealthCheck.IncludeMachinesInDeployment = "DoNotAlterMachines"
+            Octopus.Action.HealthCheck.IncludeMachinesInDeployment = "IncludeCheckedMachines"
             Octopus.Action.HealthCheck.Type = "FullHealthCheck"
             Octopus.Action.RunOnServer = "false"
         }
