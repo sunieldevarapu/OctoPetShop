@@ -11,6 +11,7 @@ step "Manual Intervention Required" {
             Octopus.Action.Manual.BlockConcurrentDeployments = "False"
             Octopus.Action.Manual.Instructions = "Review and approve"
             Octopus.Action.Manual.ResponsibleTeamIds = "teams-managers"
+            Octopus.Action.RunOnServer = "false"
         }
         worker_pool_variable = ""
     }
@@ -35,7 +36,6 @@ step "Deploy Azure OctoPetShop Web Web App" {
             Octopus.Action.Package.JsonConfigurationVariablesTargets = "appsettings.json"
             Octopus.Action.Package.PackageId = "OctopusSamples.OctoPetShop.Web"
             Octopus.Action.PowerShell.Edition = "Desktop"
-            Octopus.Action.RunOnServer = "true"
             OctopusUseBundledTooling = "True"
         }
         worker_pool = "Windows"
@@ -70,7 +70,6 @@ step "Deploy OctoPetShop Product Service Web App" {
             Octopus.Action.Package.JsonConfigurationVariablesTargets = "appsettings.json"
             Octopus.Action.Package.PackageId = "OctopusSamples.OctoPetShop.ProductService"
             Octopus.Action.PowerShell.Edition = "Desktop"
-            Octopus.Action.RunOnServer = "true"
             OctopusUseBundledTooling = "True"
         }
         worker_pool = "Windows"
@@ -105,7 +104,6 @@ step "Deploy OctoPetShop Shopping Cart Service Web App" {
             Octopus.Action.Package.JsonConfigurationVariablesTargets = "appsettings.json"
             Octopus.Action.Package.PackageId = "OctopusSamples.OctoPetShop.ShoppingCartService"
             Octopus.Action.PowerShell.Edition = "Desktop"
-            Octopus.Action.RunOnServer = "true"
             OctopusUseBundledTooling = "True"
         }
         worker_pool = "Windows"
@@ -135,6 +133,7 @@ step "Deploy OctoPetShop Database" {
             Octopus.Action.Package.DownloadOnTentacle = "False"
             Octopus.Action.Package.FeedId = "Octopus Server (built-in)"
             Octopus.Action.Package.PackageId = "OctopusSamples.OctoPetShop.Database"
+            Octopus.Action.RunOnServer = "false"
         }
         worker_pool_variable = ""
 
@@ -157,12 +156,11 @@ step "Run a Script" {
     action {
         action_type = "Octopus.Script"
         properties = {
-            Octopus.Action.RunOnServer = "true"
             Octopus.Action.Script.ScriptBody = <<-EOT
                 $URL = $OctopusParameters["Project.Web.URL"]
                 Write-Highlight "OctoPetShop has been deployed to [$url]($url)"
                 Write-Highlight "Please verify the deployment has completed successfully"
-                Write-Highlight "Hello Derek"
+                
             EOT
             Octopus.Action.Script.ScriptSource = "Inline"
             Octopus.Action.Script.Syntax = "PowerShell"
