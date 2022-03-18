@@ -35,6 +35,7 @@ step "Health Check" {
             Octopus.Action.HealthCheck.ErrorHandling = "TreatExceptionsAsErrors"
             Octopus.Action.HealthCheck.IncludeMachinesInDeployment = "DoNotAlterMachines"
             Octopus.Action.HealthCheck.Type = "FullHealthCheck"
+            Octopus.Action.RunOnServer = "false"
         }
         worker_pool_variable = ""
     }
@@ -211,7 +212,7 @@ step "Run a Script" {
     }
 }
 
-step "Manual Intervention before destroying test" {
+step "Manual Intervention before destroying Test Infrastructure" {
 
     action {
         action_type = "Octopus.Manual"
@@ -220,6 +221,7 @@ step "Manual Intervention before destroying test" {
             Octopus.Action.Manual.BlockConcurrentDeployments = "False"
             Octopus.Action.Manual.Instructions = "Please test your code before approving as this will destroy all infrastructure"
             Octopus.Action.Manual.ResponsibleTeamIds = "Octopus Managers"
+            Octopus.Action.RunOnServer = "false"
         }
         worker_pool_variable = ""
     }
