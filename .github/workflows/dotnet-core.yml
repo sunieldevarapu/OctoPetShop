@@ -76,4 +76,4 @@ jobs:
         space: ${{ secrets.OCTOPUSSERVER_SPACE }}
         project: "OctoPetShop"
         deploy_to: "Test"
-        progress: true
+        progress: false
