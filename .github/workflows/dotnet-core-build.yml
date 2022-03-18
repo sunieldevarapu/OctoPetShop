@@ -66,6 +66,7 @@ jobs:
         server: ${{ secrets.OCTOPUSSERVERURL }}
         packages: "artifacts/OctopusSamples.OctoPetShop.Database.${{ env.PACKAGE_VERSION }}.zip,artifacts/OctopusSamples.OctoPetShop.Web.${{ env.PACKAGE_VERSION }}.zip,artifacts/OctopusSamples.OctoPetShop.ProductService.${{ env.PACKAGE_VERSION }}.zip,artifacts/OctopusSamples.OctoPetShop.ShoppingCartService.${{ env.PACKAGE_VERSION }}.zip"
         space: ${{ secrets.OCTOPUSSERVER_SPACE }}
+        overwrite_mode: OverwriteExisting
     - name: Create Release
       run: |
         octo create-release --project OctoPetShop --version="$PACKAGE_VERSION" --server="${{ secrets.OCTOPUSSERVERURL }}" --apiKey="${{ secrets.OCTOPUSSERVERAPIKEY }}" --space="${{ secrets.OCTOPUSSERVER_SPACE }}"
