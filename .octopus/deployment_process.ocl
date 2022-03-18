@@ -53,7 +53,7 @@ step "Manual Intervention Required" {
         properties = {
             Octopus.Action.Manual.BlockConcurrentDeployments = "False"
             Octopus.Action.Manual.Instructions = "Review and approve"
-            Octopus.Action.Manual.ResponsibleTeamIds = "teams-managers"
+            Octopus.Action.Manual.ResponsibleTeamIds = "Octopus Managers"
             Octopus.Action.RunOnServer = "false"
         }
         worker_pool_variable = ""
