@@ -1,3 +1,45 @@
+step "Create Infrastructure for Test" {
+
+    action {
+        environments = ["Test"]
+        properties = {
+            Octopus.Action.Template.Id = "ActionTemplates-302"
+            Octopus.Action.Template.Version = "13"
+            Run.Runbook.Api.Key = "#{Global.Api.Key}"
+            Run.Runbook.AutoApproveManualInterventions = "No"
+            Run.Runbook.Base.Url = "#{Global.Base.Url}"
+            Run.Runbook.CancelInSeconds = "1800"
+            Run.Runbook.DateTime = "N/A"
+            Run.Runbook.Environment.Name = "#{Octopus.Environment.Name}"
+            Run.Runbook.Machines = "N/A"
+            Run.Runbook.ManualIntervention.EnvironmentToUse = "#{Octopus.Environment.Name}"
+            Run.Runbook.Name = "#{Project.Runbook.Create}"
+            Run.Runbook.Project.Name = "#{Octopus.Project.Name}"
+            Run.Runbook.Space.Name = "#{Octopus.Space.Name}"
+            Run.Runbook.UsePublishedSnapShot = "True"
+            Run.Runbook.Waitforfinish = "True"
+        }
+        worker_pool = "Windows"
+    }
+}
+
+step "Health Check" {
+    properties = {
+        Octopus.Action.TargetRoles = "OctoPetShop-Product-Service,OctoPetShop-ShoppingCart-Service,OctoPetShop-Web"
+    }
+
+    action {
+        action_type = "Octopus.HealthCheck"
+        environments = ["Test"]
+        properties = {
+            Octopus.Action.HealthCheck.ErrorHandling = "TreatExceptionsAsErrors"
+            Octopus.Action.HealthCheck.IncludeMachinesInDeployment = "DoNotAlterMachines"
+            Octopus.Action.HealthCheck.Type = "FullHealthCheck"
+        }
+        worker_pool_variable = ""
+    }
+}
+
 step "Manual Intervention Required" {
     condition = "Variable"
     properties = {
@@ -166,5 +208,44 @@ step "Run a Script" {
             Octopus.Action.Script.Syntax = "PowerShell"
         }
         worker_pool = "Windows"
+    }
+}
+
+step "Manual Intervention before destroying test" {
+
+    action {
+        action_type = "Octopus.Manual"
+        environments = ["Test"]
+        properties = {
+            Octopus.Action.Manual.BlockConcurrentDeployments = "False"
+            Octopus.Action.Manual.Instructions = "Please test your code before approving as this will destroy all infrastructure"
+            Octopus.Action.Manual.ResponsibleTeamIds = "Octopus Managers"
+        }
+        worker_pool_variable = ""
+    }
+}
+
+step "Run Octopus Deploy Runbook" {
+
+    action {
+        environments = ["Test"]
+        properties = {
+            Octopus.Action.Template.Id = "ActionTemplates-302"
+            Octopus.Action.Template.Version = "13"
+            Run.Runbook.Api.Key = "#{Global.Api.Key}"
+            Run.Runbook.AutoApproveManualInterventions = "No"
+            Run.Runbook.Base.Url = "#{Global.Base.Url}"
+            Run.Runbook.CancelInSeconds = "1800"
+            Run.Runbook.DateTime = "N/A"
+            Run.Runbook.Environment.Name = "#{Octopus.Environment.Name}"
+            Run.Runbook.Machines = "N/A"
+            Run.Runbook.ManualIntervention.EnvironmentToUse = "#{Octopus.Environment.Name}"
+            Run.Runbook.Name = "#{Project.Runbook.Destroy}"
+            Run.Runbook.Project.Name = "#{Octopus.Project.Name}"
+            Run.Runbook.Space.Name = "#{Octopus.Space.Name}"
+            Run.Runbook.UsePublishedSnapShot = "True"
+            Run.Runbook.Waitforfinish = "True"
+        }
+        worker_pool = "Hosted Windows"
     }
 }
