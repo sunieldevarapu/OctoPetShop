@@ -66,13 +66,9 @@ jobs:
         server: ${{ secrets.OCTOPUSSERVERURL }}
         packages: "artifacts/OctopusSamples.OctoPetShop.Database.${{ env.PACKAGE_VERSION }}.zip,artifacts/OctopusSamples.OctoPetShop.Web.${{ env.PACKAGE_VERSION }}.zip,artifacts/OctopusSamples.OctoPetShop.ProductService.${{ env.PACKAGE_VERSION }}.zip,artifacts/OctopusSamples.OctoPetShop.ShoppingCartService.${{ env.PACKAGE_VERSION }}.zip"
         space: ${{ secrets.OCTOPUSSERVER_SPACE }}
-    - name: Create and deploy release
-      uses: OctopusDeploy/create-release-action@v1.1.1
-      with:
-        api_key: ${{ secrets.OCTOPUSSERVERAPIKEY }}
-        server: ${{ secrets.OCTOPUSSERVERURL }}
-        space: ${{ secrets.OCTOPUSSERVER_SPACE }}
-        version: "$PACKAGE_VERSION"
-        project: "OctoPetShop"
-        deploy_to: "Test"
-        progress: false
+    - name: Create Release
+      run: |
+        octo create-release --project OctoPetShop --version="$PACKAGE_VERSION" --server="${{ secrets.OCTOPUSSERVERURL }}" --apiKey="${{ secrets.OCTOPUSSERVERAPIKEY }}" --space="${{ secrets.OCTOPUSSERVER_SPACE }}"
+    - name: Deploy Release
+      run: |
+        octo deploy-release --project OctoPetShop --version="$PACKAGE_VERSION" --server="${{ secrets.OCTOPUSSERVERURL }}" --apiKey="${{ secrets.OCTOPUSSERVERAPIKEY }}" --space="${{ secrets.OCTOPUSSERVER_SPACE }}" --progress false --deployTo Test
