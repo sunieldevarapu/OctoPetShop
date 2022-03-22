@@ -2,6 +2,7 @@ step "Create Infrastructure for Test" {
 
     action {
         environments = ["Test"]
+        notes = "This step runs the Create Infrastructure Runbook and it only runs for Test. The benefit of this approach is that the Test Infrastructure won't be needed for a long time which reduces your hosting costs for Test by more than 95%"
         properties = {
             Octopus.Action.Template.Id = "ActionTemplates-302"
             Octopus.Action.Template.Version = "13"
@@ -31,6 +32,7 @@ step "Health Check" {
     action {
         action_type = "Octopus.HealthCheck"
         environments = ["Test"]
+        notes = "This health check is required after the Infrastructure is created as we're using Dynamic Infrastructure which didn't exist when we started the deployment"
         properties = {
             Octopus.Action.HealthCheck.ErrorHandling = "TreatExceptionsAsErrors"
             Octopus.Action.HealthCheck.IncludeMachinesInDeployment = "IncludeCheckedMachines"
@@ -50,6 +52,7 @@ step "Manual Intervention Required" {
     action {
         action_type = "Octopus.Manual"
         environments = ["Production"]
+        notes = "This manual intervention is an approval step for Production only. "
         properties = {
             Octopus.Action.Manual.BlockConcurrentDeployments = "False"
             Octopus.Action.Manual.Instructions = "Review and approve"
@@ -60,13 +63,14 @@ step "Manual Intervention Required" {
     }
 }
 
-step "Deploy Azure OctoPetShop Web Web App" {
+step "Deploy Azure OctoPetShop Web App" {
     properties = {
         Octopus.Action.TargetRoles = "OctoPetShop-Web"
     }
 
     action {
         action_type = "Octopus.AzureWebApp"
+        notes = "This step deploys the OctoPetShop Web App to Azure Web Apps using PaaS"
         properties = {
             Octopus.Action.Azure.AppOffline = "True"
             Octopus.Action.Azure.RemoveAdditionalFiles = "True"
@@ -102,6 +106,7 @@ step "Deploy OctoPetShop Product Service Web App" {
 
     action {
         action_type = "Octopus.AzureWebApp"
+        notes = "This step deploys the OctoPetShop Product Service to Azure Web Apps using PaaS"
         properties = {
             Octopus.Action.Azure.AppOffline = "True"
             Octopus.Action.Azure.UseChecksum = "False"
@@ -136,6 +141,7 @@ step "Deploy OctoPetShop Shopping Cart Service Web App" {
 
     action {
         action_type = "Octopus.AzureWebApp"
+        notes = "This step deploys the OctoPetShop Shopping Cart Service to Azure Web Apps using PaaS"
         properties = {
             Octopus.Action.Azure.AppOffline = "True"
             Octopus.Action.Azure.UseChecksum = "False"
@@ -169,6 +175,7 @@ step "Deploy OctoPetShop Database" {
 
     action {
         action_type = "Octopus.TentaclePackage"
+        notes = "This step deploys the OctoPetShop Database to Azure SQL using PaaS"
         properties = {
             Octopus.Action.EnabledFeatures = ",Octopus.Features.ConfigurationTransforms,Octopus.Features.ConfigurationVariables"
             Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles = "True"
@@ -191,13 +198,14 @@ step "Deploy OctoPetShop Database" {
     }
 }
 
-step "Run a Script" {
+step "Print out URL" {
     properties = {
         Octopus.Action.TargetRoles = "OctoPetShop-Web"
     }
 
     action {
         action_type = "Octopus.Script"
+        notes = "This step prints out the URL of the Web App"
         properties = {
             Octopus.Action.Script.ScriptBody = <<-EOT
                 $URL = $OctopusParameters["Project.Web.URL"]
@@ -217,6 +225,7 @@ step "Manual Intervention before destroying Test Infrastructure" {
     action {
         action_type = "Octopus.Manual"
         environments = ["Test"]
+        notes = "This Manual Intervention step exists so that you can test your changes on freshly created Infrastructure. When you approve this step it will destroy the Infrastucture for Test"
         properties = {
             Octopus.Action.Manual.BlockConcurrentDeployments = "False"
             Octopus.Action.Manual.Instructions = "Please test your code before approving as this will destroy all infrastructure"
@@ -231,6 +240,7 @@ step "Run Octopus Deploy Runbook" {
 
     action {
         environments = ["Test"]
+        notes = "This step destroys the Infrastructure for Test"
         properties = {
             Octopus.Action.Template.Id = "ActionTemplates-302"
             Octopus.Action.Template.Version = "13"
