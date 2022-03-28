@@ -3,8 +3,6 @@ name: .NET Core Build
 on:
   pull_request:
     branches: [ main ]
-  schedule:
-    - cron: "0 8 * * *"
   workflow_dispatch:
     logLevel:
       description: 'Log level'
