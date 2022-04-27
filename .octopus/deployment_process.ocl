@@ -31,12 +31,12 @@ step "Health Check" {
 
     action {
         action_type = "Octopus.HealthCheck"
-        environments = ["Test"]
         notes = "This health check is required after the Infrastructure is created as we're using Dynamic Infrastructure which didn't exist when we started the deployment"
         properties = {
             Octopus.Action.HealthCheck.ErrorHandling = "TreatExceptionsAsErrors"
             Octopus.Action.HealthCheck.IncludeMachinesInDeployment = "IncludeCheckedMachines"
             Octopus.Action.HealthCheck.Type = "FullHealthCheck"
+            Octopus.Action.RunOnServer = "false"
         }
         worker_pool_variable = ""
     }
@@ -56,6 +56,7 @@ step "Manual Intervention Required" {
             Octopus.Action.Manual.BlockConcurrentDeployments = "False"
             Octopus.Action.Manual.Instructions = "Review and approve"
             Octopus.Action.Manual.ResponsibleTeamIds = "Octopus Managers"
+            Octopus.Action.RunOnServer = "false"
         }
         worker_pool_variable = ""
     }
@@ -181,6 +182,7 @@ step "Deploy OctoPetShop Database" {
             Octopus.Action.Package.DownloadOnTentacle = "False"
             Octopus.Action.Package.FeedId = "Octopus Server (built-in)"
             Octopus.Action.Package.PackageId = "OctopusSamples.OctoPetShop.Database"
+            Octopus.Action.RunOnServer = "false"
         }
         worker_pool_variable = ""
 
@@ -224,6 +226,7 @@ step "Manual Intervention before destroying Test Infrastructure" {
             Octopus.Action.Manual.BlockConcurrentDeployments = "False"
             Octopus.Action.Manual.Instructions = "Please test your code before approving as this will destroy all infrastructure"
             Octopus.Action.Manual.ResponsibleTeamIds = "Octopus Managers"
+            Octopus.Action.RunOnServer = "false"
         }
         worker_pool_variable = ""
     }
