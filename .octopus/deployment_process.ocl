@@ -1,0 +1,255 @@
+step "Create Infrastructure for Test" {
+
+    action {
+        environments = ["Test"]
+        notes = "This step runs the Create Infrastructure Runbook and it only runs for Test. The benefit of this approach is that the Test Infrastructure won't be needed for a long time which reduces your hosting costs for Test by more than 95%"
+        properties = {
+            Octopus.Action.Template.Id = "ActionTemplates-663"
+            Octopus.Action.Template.Version = "13"
+            Run.Runbook.Api.Key = "#{Global.Api.Key}"
+            Run.Runbook.AutoApproveManualInterventions = "No"
+            Run.Runbook.Base.Url = "#{Global.Base.Url}"
+            Run.Runbook.CancelInSeconds = "1800"
+            Run.Runbook.DateTime = "N/A"
+            Run.Runbook.Environment.Name = "#{Octopus.Environment.Name}"
+            Run.Runbook.Machines = "N/A"
+            Run.Runbook.ManualIntervention.EnvironmentToUse = "#{Octopus.Environment.Name}"
+            Run.Runbook.Name = "#{Project.Runbook.Create}"
+            Run.Runbook.Project.Name = "#{Octopus.Project.Name}"
+            Run.Runbook.Space.Name = "#{Octopus.Space.Name}"
+            Run.Runbook.UsePublishedSnapShot = "True"
+            Run.Runbook.Waitforfinish = "True"
+        }
+        worker_pool = "Windows"
+    }
+}
+
+step "Health Check" {
+    properties = {
+        Octopus.Action.TargetRoles = "OctoPetShop-Product-Service,OctoPetShop-ShoppingCart-Service,OctoPetShop-Web"
+    }
+
+    action {
+        action_type = "Octopus.HealthCheck"
+        notes = "This health check is required after the Infrastructure is created as we're using Dynamic Infrastructure which didn't exist when we started the deployment"
+        properties = {
+            Octopus.Action.HealthCheck.ErrorHandling = "TreatExceptionsAsErrors"
+            Octopus.Action.HealthCheck.IncludeMachinesInDeployment = "IncludeCheckedMachines"
+            Octopus.Action.HealthCheck.Type = "FullHealthCheck"
+        }
+        worker_pool_variable = ""
+    }
+}
+
+step "Manual Intervention Required" {
+    condition = "Variable"
+    properties = {
+        Octopus.Step.ConditionVariableExpression = "#{unless Octopus.Deployment.Trigger.Name}True#{/unless}"
+    }
+
+    action {
+        action_type = "Octopus.Manual"
+        environments = ["Production"]
+        notes = "This manual intervention is an approval step for Production only. "
+        properties = {
+            Octopus.Action.Manual.BlockConcurrentDeployments = "False"
+            Octopus.Action.Manual.Instructions = "Review and approve"
+            Octopus.Action.Manual.ResponsibleTeamIds = "Octopus Managers"
+        }
+        worker_pool_variable = ""
+    }
+}
+
+step "Deploy Azure OctoPetShop Web Web App" {
+    properties = {
+        Octopus.Action.TargetRoles = "OctoPetShop-Web"
+    }
+
+    action {
+        action_type = "Octopus.AzureWebApp"
+        notes = "This step deploys the OctoPetShop Web App to Azure Web Apps using PaaS"
+        properties = {
+            Octopus.Action.Azure.AppOffline = "True"
+            Octopus.Action.Azure.RemoveAdditionalFiles = "True"
+            Octopus.Action.Azure.UseChecksum = "False"
+            Octopus.Action.EnabledFeatures = "Octopus.Features.JsonConfigurationVariables,Octopus.Features.ConfigurationVariables,Octopus.Features.ConfigurationTransforms,Octopus.Features.SelectPowerShellEditionForWindows"
+            Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles = "True"
+            Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings = "True"
+            Octopus.Action.Package.DownloadOnTentacle = "False"
+            Octopus.Action.Package.FeedId = "Octopus Server (built-in)"
+            Octopus.Action.Package.JsonConfigurationVariablesTargets = "appsettings.json"
+            Octopus.Action.Package.PackageId = "OctopusSamples.OctoPetShop.Web"
+            Octopus.Action.PowerShell.Edition = "Desktop"
+            OctopusUseBundledTooling = "True"
+        }
+        worker_pool = "Windows"
+
+        packages {
+            acquisition_location = "Server"
+            feed = "Octopus Server (built-in)"
+            package_id = "OctopusSamples.OctoPetShop.Web"
+            properties = {
+                SelectionMode = "immediate"
+            }
+        }
+    }
+}
+
+step "Deploy OctoPetShop Product Service Web App" {
+    properties = {
+        Octopus.Action.TargetRoles = "OctoPetShop-Product-Service"
+    }
+    start_trigger = "StartWithPrevious"
+
+    action {
+        action_type = "Octopus.AzureWebApp"
+        notes = "This step deploys the OctoPetShop Product Service to Azure Web Apps using PaaS"
+        properties = {
+            Octopus.Action.Azure.AppOffline = "True"
+            Octopus.Action.Azure.UseChecksum = "False"
+            Octopus.Action.EnabledFeatures = "Octopus.Features.JsonConfigurationVariables,Octopus.Features.ConfigurationVariables,Octopus.Features.ConfigurationTransforms,Octopus.Features.SelectPowerShellEditionForWindows"
+            Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles = "True"
+            Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings = "True"
+            Octopus.Action.Package.DownloadOnTentacle = "False"
+            Octopus.Action.Package.FeedId = "Octopus Server (built-in)"
+            Octopus.Action.Package.JsonConfigurationVariablesTargets = "appsettings.json"
+            Octopus.Action.Package.PackageId = "OctopusSamples.OctoPetShop.ProductService"
+            Octopus.Action.PowerShell.Edition = "Desktop"
+            OctopusUseBundledTooling = "True"
+        }
+        worker_pool = "Windows"
+
+        packages {
+            acquisition_location = "Server"
+            feed = "Octopus Server (built-in)"
+            package_id = "OctopusSamples.OctoPetShop.ProductService"
+            properties = {
+                SelectionMode = "immediate"
+            }
+        }
+    }
+}
+
+step "Deploy OctoPetShop Shopping Cart Service Web App" {
+    properties = {
+        Octopus.Action.TargetRoles = "OctoPetShop-ShoppingCart-Service"
+    }
+    start_trigger = "StartWithPrevious"
+
+    action {
+        action_type = "Octopus.AzureWebApp"
+        notes = "This step deploys the OctoPetShop Shopping Cart Service to Azure Web Apps using PaaS"
+        properties = {
+            Octopus.Action.Azure.AppOffline = "True"
+            Octopus.Action.Azure.UseChecksum = "False"
+            Octopus.Action.EnabledFeatures = "Octopus.Features.JsonConfigurationVariables,Octopus.Features.ConfigurationVariables,Octopus.Features.ConfigurationTransforms,Octopus.Features.SelectPowerShellEditionForWindows"
+            Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles = "True"
+            Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings = "True"
+            Octopus.Action.Package.DownloadOnTentacle = "False"
+            Octopus.Action.Package.FeedId = "Octopus Server (built-in)"
+            Octopus.Action.Package.JsonConfigurationVariablesTargets = "appsettings.json"
+            Octopus.Action.Package.PackageId = "OctopusSamples.OctoPetShop.ShoppingCartService"
+            Octopus.Action.PowerShell.Edition = "Desktop"
+            OctopusUseBundledTooling = "True"
+        }
+        worker_pool = "Windows"
+
+        packages {
+            acquisition_location = "Server"
+            feed = "Octopus Server (built-in)"
+            package_id = "OctopusSamples.OctoPetShop.ShoppingCartService"
+            properties = {
+                SelectionMode = "immediate"
+            }
+        }
+    }
+}
+
+step "Deploy OctoPetShop Database" {
+    properties = {
+        Octopus.Action.TargetRoles = "Bastion"
+    }
+
+    action {
+        action_type = "Octopus.TentaclePackage"
+        notes = "This step deploys the OctoPetShop Database to Azure SQL using PaaS"
+        properties = {
+            Octopus.Action.EnabledFeatures = ",Octopus.Features.ConfigurationTransforms,Octopus.Features.ConfigurationVariables"
+            Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles = "True"
+            Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings = "True"
+            Octopus.Action.Package.DownloadOnTentacle = "False"
+            Octopus.Action.Package.FeedId = "Octopus Server (built-in)"
+            Octopus.Action.Package.PackageId = "OctopusSamples.OctoPetShop.Database"
+        }
+        worker_pool_variable = ""
+
+        packages {
+            acquisition_location = "Server"
+            feed = "Octopus Server (built-in)"
+            package_id = "OctopusSamples.OctoPetShop.Database"
+            properties = {
+                SelectionMode = "immediate"
+            }
+        }
+    }
+}
+
+step "Print out URL" {
+
+    action {
+        action_type = "Octopus.Script"
+        notes = "This step prints out the URL of the Web App"
+        properties = {
+            Octopus.Action.Script.ScriptBody = <<-EOT
+                $URL = $OctopusParameters["Project.Web.URL"]
+                Write-Highlight "OctoPetShop has been deployed to [$url]($url)"
+                Write-Highlight "Please verify the deployment has completed successfully"
+                
+            EOT
+            Octopus.Action.Script.ScriptSource = "Inline"
+            Octopus.Action.Script.Syntax = "PowerShell"
+        }
+        worker_pool = "Windows"
+    }
+}
+
+step "Manual Intervention before destroying Test Infrastructure" {
+
+    action {
+        action_type = "Octopus.Manual"
+        environments = ["Test"]
+        notes = "This Manual Intervention step exists so that you can test your changes on freshly created Infrastructure. When you approve this step it will destroy the Infrastucture for Test"
+        properties = {
+            Octopus.Action.Manual.BlockConcurrentDeployments = "False"
+            Octopus.Action.Manual.Instructions = "Please test your code before approving as this will destroy all infrastructure"
+            Octopus.Action.Manual.ResponsibleTeamIds = "Octopus Managers"
+        }
+        worker_pool_variable = ""
+    }
+}
+
+step "Destroy Test Infrastructure" {
+
+    action {
+        environments = ["Test"]
+        notes = "This step destroys the Infrastructure for Test"
+        properties = {
+            Octopus.Action.Template.Id = "ActionTemplates-663"
+            Octopus.Action.Template.Version = "13"
+            Run.Runbook.Api.Key = "#{Global.Api.Key}"
+            Run.Runbook.AutoApproveManualInterventions = "No"
+            Run.Runbook.Base.Url = "#{Global.Base.Url}"
+            Run.Runbook.CancelInSeconds = "1800"
+            Run.Runbook.DateTime = "N/A"
+            Run.Runbook.Environment.Name = "#{Octopus.Environment.Name}"
+            Run.Runbook.Machines = "N/A"
+            Run.Runbook.ManualIntervention.EnvironmentToUse = "#{Octopus.Environment.Name}"
+            Run.Runbook.Name = "#{Project.Runbook.Destroy}"
+            Run.Runbook.Project.Name = "#{Octopus.Project.Name}"
+            Run.Runbook.Space.Name = "#{Octopus.Space.Name}"
+            Run.Runbook.UsePublishedSnapShot = "True"
+            Run.Runbook.Waitforfinish = "True"
+        }
+        worker_pool = "Windows"
+    }
+}
