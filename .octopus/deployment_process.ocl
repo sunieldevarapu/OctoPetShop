@@ -36,6 +36,7 @@ step "Health Check" {
             Octopus.Action.HealthCheck.ErrorHandling = "TreatExceptionsAsErrors"
             Octopus.Action.HealthCheck.IncludeMachinesInDeployment = "IncludeCheckedMachines"
             Octopus.Action.HealthCheck.Type = "FullHealthCheck"
+            Octopus.Action.RunOnServer = "false"
         }
         worker_pool_variable = ""
     }
@@ -55,6 +56,7 @@ step "Manual Intervention Required" {
             Octopus.Action.Manual.BlockConcurrentDeployments = "False"
             Octopus.Action.Manual.Instructions = "Review and approve"
             Octopus.Action.Manual.ResponsibleTeamIds = "Octopus Managers"
+            Octopus.Action.RunOnServer = "false"
         }
         worker_pool_variable = ""
     }
@@ -180,6 +182,7 @@ step "Deploy OctoPetShop Database" {
             Octopus.Action.Package.DownloadOnTentacle = "False"
             Octopus.Action.Package.FeedId = "Octopus Server (built-in)"
             Octopus.Action.Package.PackageId = "OctopusSamples.OctoPetShop.Database"
+            Octopus.Action.RunOnServer = "false"
         }
         worker_pool_variable = ""
 
@@ -223,6 +226,7 @@ step "Manual Intervention before destroying Test Infrastructure" {
             Octopus.Action.Manual.BlockConcurrentDeployments = "False"
             Octopus.Action.Manual.Instructions = "Please test your code before approving as this will destroy all infrastructure"
             Octopus.Action.Manual.ResponsibleTeamIds = "Octopus Managers"
+            Octopus.Action.RunOnServer = "false"
         }
         worker_pool_variable = ""
     }
@@ -251,5 +255,18 @@ step "Destroy Test Infrastructure" {
             Run.Runbook.Waitforfinish = "True"
         }
         worker_pool = "Windows"
+    }
+}
+
+step "Test for Config as Code" {
+
+    action {
+        action_type = "Octopus.Script"
+        properties = {
+            Octopus.Action.Script.ScriptBody = "Write-Host \"Demo for Config as Code\""
+            Octopus.Action.Script.ScriptSource = "Inline"
+            Octopus.Action.Script.Syntax = "PowerShell"
+        }
+        worker_pool = "Hosted Windows"
     }
 }
