@@ -1,7 +1,6 @@
 step "Create Infrastructure for Test" {
 
     action {
-        environments = ["Test", "Production"]
         notes = "This step runs the Create Infrastructure Runbook and it only runs for Test. The benefit of this approach is that the Test Infrastructure won't be needed for a long time which reduces your hosting costs for Test by more than 95%"
         properties = {
             Octopus.Action.Template.Id = "ActionTemplates-662"
