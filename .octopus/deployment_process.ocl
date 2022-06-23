@@ -4,7 +4,7 @@ step "Create Infrastructure for Test" {
         environments = ["Test"]
         notes = "Hello NDC London "
         properties = {
-            Octopus.Action.Template.Id = "ActionTemplates-302"
+            Octopus.Action.Template.Id = "ActionTemplates-662"
             Octopus.Action.Template.Version = "13"
             Run.Runbook.Api.Key = "#{Global.Api.Key}"
             Run.Runbook.AutoApproveManualInterventions = "No"
@@ -238,7 +238,7 @@ step "Destroy Test Infrastructure" {
         environments = ["Test"]
         notes = "This step destroys the Infrastructure for Test"
         properties = {
-            Octopus.Action.Template.Id = "ActionTemplates-302"
+            Octopus.Action.Template.Id = "ActionTemplates-662"
             Octopus.Action.Template.Version = "13"
             Run.Runbook.Api.Key = "#{Global.Api.Key}"
             Run.Runbook.AutoApproveManualInterventions = "No"
